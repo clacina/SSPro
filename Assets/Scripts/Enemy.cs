@@ -32,13 +32,7 @@ public class Enemy : MonoBehaviour
         transform.position = new Vector3(newXPos, _spawnY, 0);
     }
 
-    private void OnCollisionEnter(Collision other)
-    {
-        Debug.Log("Collided with " + other.collider.name);
-
-    }
-
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if(other.tag == "Laser")
         {
