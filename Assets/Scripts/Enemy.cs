@@ -11,9 +11,15 @@ public class Enemy : MonoBehaviour
     private float _xpos_min = -9.0f;
     private float _xpos_max = 9.16f;
 
+    private UI_Manager um;
+    private Animator _animator;
 
     void Start()
     {
+        um = GameObject.FindObjectOfType<UI_Manager>();
+        Debug.Assert(um);
+        _animator = GetComponent<Animator>();
+        Debug.Assert(_animator);
         Spawn();
     }
 
@@ -36,8 +42,17 @@ public class Enemy : MonoBehaviour
     {
         if(other.tag == "Laser")
         {
+            um.UpdateScore(10);
             Destroy(other.gameObject);
-            Destroy(this.gameObject);
+            Die();
         }
+    }
+
+    public void Die()
+    {
+        // Stop Moving
+        _speed = 0.0f;
+        _animator.SetTrigger("OnEnemyDeath");
+        Destroy(this.gameObject, 2.8f);
     }
 }

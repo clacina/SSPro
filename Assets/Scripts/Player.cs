@@ -23,16 +23,27 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _tripleShotDuration = 5.0f, _speedUpgradeDuration = 5.0f, _shieldUpgradeDuration = 8.0f;
 
+    [SerializeField]
+    private GameObject _leftEngineFlame, _rightEngineFlame;
+
     private float _nextFire = 0.0f;
     private SpawnManager _spawnManager = null;
+    private GameObject _shield = null;
 
     void Start()
     {
         transform.position = new Vector3(0, 0, 0);
         _spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
+
+        _shield = this.gameObject.transform.GetChild(0).gameObject;
+
         Debug.Assert(_spawnManager);
         Debug.Assert(_LaserPrefab);
         Debug.Assert(_TripleShotLaserPrefab);
+        Debug.Assert(_leftEngineFlame);
+        Debug.Assert(_rightEngineFlame);
+        Debug.Assert(_shield);
+        _shield.SetActive(false);
     }
 
     void Update()
@@ -93,12 +104,13 @@ public class Player : MonoBehaviour
      */
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Player hit " + other.tag);
         if(other.tag == "Enemy")
         {
-            // decrease life and kill enemy
-            Destroy(other.gameObject);
             Damage(1);
+            // decrease life and kill enemy
+            Enemy enemy = other.gameObject.GetComponent<Enemy>();
+            Debug.Assert(enemy);
+            enemy.Die();
         }
     }
 
@@ -107,13 +119,29 @@ public class Player : MonoBehaviour
      */
     public void Damage(int amount)
     {
-        Die(amount);
+        if (_ShieldsEnabled)
+        {
+            _shield.SetActive(false);
+            _ShieldsEnabled = false;
+        }
+        else
+        {
+            Die(amount);
+        }
     }
 
     private void Die(int amount)
     {
         Debug.Log("Player Die: " + _lives);
         _lives -= amount;
+
+        _leftEngineFlame.SetActive(true);
+
+        if(_lives < 2)
+        {
+            _rightEngineFlame.SetActive(true);
+        }
+
         if (_lives <= 0)
         {
             _spawnManager.OnPlayerDeath();
@@ -136,6 +164,7 @@ public class Player : MonoBehaviour
             case PowerUpType.SHIELD:
                 yield return new WaitForSeconds(_shieldUpgradeDuration);
                 _ShieldsEnabled = false;
+                _shield.SetActive(true);
                 break;
         }
     }
@@ -152,6 +181,7 @@ public class Player : MonoBehaviour
                 break;
             case PowerUpType.SHIELD:
                 _ShieldsEnabled = true;
+                _shield.SetActive(true);
                 break;
         }
         StartCoroutine(PowerUptCooldown(powerUp));

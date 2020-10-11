@@ -20,11 +20,15 @@ public class SpawnManager : MonoBehaviour
     private float _spawnY = 7.0f;
     private float _xpos_min = -9.0f;
     private float _xpos_max = 9.16f;
-    private bool _spawnMode = true;
+    private bool _spawnMode = false;
 
     void Start()
     {
-        Debug.Log("Spawn Manager start");
+    }
+
+    public void StartSpawn()
+    {
+        _spawnMode = true;
         StartCoroutine(SpawnEmeny());
         StartCoroutine(SpawnPowerupRoutine());
     }
@@ -35,7 +39,6 @@ public class SpawnManager : MonoBehaviour
         {
             if(_enemyPrefab)
             {
-                Debug.Log("Spawning...");
                 float newXPos = Random.Range(_xpos_min, _xpos_max);
 
                 GameObject newEmeny = Instantiate(_enemyPrefab,
@@ -59,15 +62,18 @@ public class SpawnManager : MonoBehaviour
 
             // which power up to spawn?
             GameObject newPrefab = _tripleShotPowerupPrefab;
-
-            switch(Random.Range(0, 100) % 3)
+            PowerUpType newType = (PowerUpType)Random.Range(0, 3);
+            switch(newType)
             {
-                case 1:
+                case PowerUpType.TRIPLE_SHOT:
+                    newPrefab = _tripleShotPowerupPrefab;
+                    break;
+                case PowerUpType.SPEED:
                     newPrefab = _speedPowerupPrefab;
                     break;
-                //case 2:
-                //    newPrefab = _shieldPowerupPrefab;
-                //    break;
+                case PowerUpType.SHIELD:
+                    newPrefab = _shieldPowerupPrefab;
+                    break;
             }
 
             GameObject powerup = Instantiate(newPrefab,
